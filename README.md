@@ -1,3 +1,5 @@
+[![CI](https://github.com/TodoPR/niche-factory/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/TodoPR/niche-factory/actions/workflows/ci.yml)
+
 # niche-factory
 
 Zero-variable-cost software factory monorepo scaffold.
