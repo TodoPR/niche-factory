@@ -12,7 +12,5 @@ jobs:
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:
-          # Conservative to start; we tighten in S20 if needed.
           fail-on-severity: critical
-          # To post a summary comment, also grant 'pull-requests: write' and set:
-          # comment-summary-in-pr: true
+          # comment-summary-in-pr: true  # enable later if desired (needs perms)
