@@ -8,7 +8,6 @@ on:
 jobs:
   npm-audit:
     runs-on: ubuntu-latest
-    if: ${{ hashFiles('**/package.json') != '' }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
@@ -16,16 +15,32 @@ jobs:
         with:
           node-version: "20"
 
+      # Detect package.json after checkout (robust on minimal repos)
+      - name: Detect package manifests
+        id: pkg
+        shell: bash
+        run: |
+          if ls -1 package.json */package.json 2>/dev/null | head -n1 >/dev/null; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install from lockfile (if present)
-        if: ${{ hashFiles('**/package-lock.json') != '' }}
+        if: ${{ steps.pkg.outputs.present == 'true' && hashFiles('package-lock.json') != '' }}
         run: npm ci --omit=dev
         continue-on-error: true
 
       - name: Create lockfile (if missing)
-        if: ${{ hashFiles('**/package-lock.json') == '' }}
+        if: ${{ steps.pkg.outputs.present == 'true' && hashFiles('package-lock.json') == '' }}
         run: npm install --package-lock-only
         continue-on-error: true
 
       - name: Audit production deps (report only)
+        if: ${{ steps.pkg.outputs.present == 'true' }}
         run: npm audit --omit=dev --audit-level=high
         continue-on-error: true
+
+      - name: No package.json detected
+        if: ${{ steps.pkg.outputs.present != 'true' }}
+        run: echo "No package.json; skipping audit."
