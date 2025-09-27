@@ -2,7 +2,7 @@ name: Dependency Audit (weekly)
 
 on:
   schedule:
-    - cron: "0 4 * * 1" # Mon 04:00 UTC
+    - cron: "0 4 * * 1"
   workflow_dispatch:
 
 jobs:
@@ -15,17 +15,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-
       - name: Install from lockfile (if present)
         if: ${{ hashFiles('**/package-lock.json') != '' }}
         run: npm ci --omit=dev
         continue-on-error: true
-
       - name: Create lockfile (if missing)
         if: ${{ hashFiles('**/package-lock.json') == '' }}
         run: npm install --package-lock-only
         continue-on-error: true
-
       - name: Audit production deps (report only)
         run: npm audit --omit=dev --audit-level=high
         continue-on-error: true
